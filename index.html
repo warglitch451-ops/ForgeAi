@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ForgeAI — AI Website Builder</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#08090d;color:#fff;font-family:Inter,Arial,sans-serif}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+
+header{
+height:64px;padding:0 20px;display:flex;align-items:center;
+justify-content:space-between;background:#0d0e13;
+border-bottom:1px solid #292b35;position:sticky;top:0;z-index:20
+}
+
+.logo{font-size:23px;font-weight:900}
+.logo span{color:#8b5cf6}
+.badge{font-size:12px;color:#888}
+
+.wrap{max-width:1500px;margin:auto;padding:18px}
+
+.grid{
+display:grid;
+grid-template-columns:380px minmax(0,1fr);
+gap:18px
+}
+
+.panel{
+background:#111217;
+border:1px solid #292b35;
+border-radius:16px;
+padding:18px;
+min-width:0
+}
+
+h2{margin:0 0 14px;font-size:20px}
+
+label{
+display:block;
+margin:14px 0 7px;
+color:#aaa;
+font-size:12px;
+font-weight:700
+}
+
+input,textarea{
+width:100%;
+background:#181a21;
+color:#fff;
+border:1px solid #30323d;
+border-radius:10px;
+padding:12px;
+outline:0
+}
+
+input:focus,textarea:focus{border-color:#8b5cf6}
+
+textarea{
+height:230px;
+resize:vertical;
+line-height:1.5
+}
+
+.row{display:flex;gap:8px}
+.row input{min-width:0}
+
+.btn{
+border:1px solid #343641;
+background:#22242d;
+color:#fff;
+border-radius:10px;
+padding:10px 12px;
+font-weight:700
+}
+
+.btn:hover{
+border-color:#8b5cf6;
+background:#292b36
+}
+
+.primary{
+width:100%;
+margin-top:14px;
+border:0;
+border-radius:10px;
+padding:14px;
+background:linear-gradient(135deg,#713cf2,#9b5cff);
+color:#fff;
+font-weight:800
+}
+
+.primary:disabled{opacity:.5;cursor:wait}
+
+.status{
+min-height:22px;
+margin-top:10px;
+font-size:12px;
+color:#aaa
+}
+
+.ok{color:#68dda0}
+.err{color:#ff7777}
+
+.actions{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:7px;
+margin-top:9px
+}
+
+.small{
+margin-top:12px;
+color:#777;
+font-size:11px;
+line-height:1.5
+}
+
+/* PREVIEW */
+
+.previewHead{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+margin-bottom:12px
+}
+
+.previewHead h2{margin:0}
+
+.previewActions{
+display:flex;
+gap:7px
+}
+
+.deviceTabs{
+display:flex;
+justify-content:center;
+gap:7px;
+margin-bottom:12px;
+padding:6px;
+background:#0b0c10;
+border:1px solid #292b35;
+border-radius:11px;
+}
+
+.device{
+border:1px solid transparent;
+background:transparent;
+color:#999;
+padding:9px 15px;
+border-radius:8px;
+font-size:12px;
+font-weight:800
+}
+
+.device:hover{color:#fff}
+
+.device.active{
+background:#713cf2;
+color:#fff;
+border-color:#713cf2
+}
+
+.previewArea{
+width:100%;
+min-height:720px;
+display:flex;
+justify-content:center;
+align-items:flex-start;
+overflow:auto;
+background:
+radial-gradient(circle at top,#242631,#08090d 70%);
+padding:15px;
+border-radius:12px;
+border:1px solid #30323d
+}
+
+.previewDevice{
+width:100%;
+height:690px;
+background:#fff;
+border-radius:7px;
+overflow:hidden;
+box-shadow:0 15px 50px rgba(0,0,0,.4);
+transition:width .3s ease
+}
+
+#preview{
+width:100%;
+height:100%;
+border:0;
+display:none;
+background:#fff
+}
+
+.empty{
+width:100%;
+height:690px;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+text-align:center;
+color:#777;
+padding:25px
+}
+
+.emptyIcon{font-size:48px;margin-bottom:10px}
+.empty b{font-size:19px;color:#ddd}
+.empty p{
+max-width:420px;
+font-size:13px;
+line-height:1.5
+}
+
+/* CODE */
+
+.code{margin-top:18px}
+
+.codeHead{
+display:flex;
+justify-content:space-between;
+align-items:center
+}
+
+pre{
+margin:12px 0 0;
+padding:14px;
+background:#08090d;
+border:1px solid #292b35;
+border-radius:10px;
+max-height:450px;
+overflow:auto;
+white-space:pre-wrap;
+word-break:break-word;
+color:#ddd;
+font:12px/1.5 monospace
+}
+
+/* FULLSCREEN */
+
+.modal{
+position:fixed;
+inset:0;
+background:#050507;
+z-index:100;
+display:none;
+flex-direction:column
+}
+
+.modal.open{display:flex}
+
+.modalBar{
+height:60px;
+flex:none;
+padding:0 12px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:#0d0e13;
+border-bottom:1px solid #292b35
+}
+
+.modalBarActions{
+display:flex;
+gap:7px
+}
+
+.modal iframe{
+width:100%;
+flex:1;
+border:0;
+background:#fff
+}
+
+/* TOAST */
+
+.toast{
+position:fixed;
+left:50%;
+bottom:20px;
+transform:translate(-50%,20px);
+opacity:0;
+background:#181a21;
+border:1px solid #3a3c47;
+padding:11px 15px;
+border-radius:10px;
+z-index:200;
+transition:.2s;
+pointer-events:none;
+font-size:12px
+}
+
+.toast.show{
+opacity:1;
+transform:translate(-50%,0)
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1000px){
+.grid{grid-template-columns:1fr}
+}
+
+@media(max-width:700px){
+.wrap{padding:10px}
+
+.panel{padding:14px}
+
+.badge{display:none}
+
+.previewHead{
+flex-direction:column;
+align-items:stretch
+}
+
+.previewActions{
+display:grid;
+grid-template-columns:1fr 1fr
+}
+
+.previewArea{
+min-height:620px
+}
+
+.previewDevice{
+height:590px
+}
+
+.empty{
+height:590px
+}
+
+.deviceTabs{
+overflow-x:auto;
+justify-content:flex-start
+}
+
+.device{
+white-space:nowrap
+}
+}
+
+@media(max-width:500px){
+.row{flex-direction:column}
+
+.row .btn{width:100%}
+
+.actions{
+grid-template-columns:1fr 1fr
+}
+
+.actions .btn:last-child{
+grid-column:1/-1
+}
+
+.modalBar{
+font-size:11px
+}
+
+.modalBarActions .btn{
+padding:8px
+}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">⚡ Forge<span>AI</span></div>
+<div class="badge">AI Website Generator</div>
+</header>
+
+<main class="wrap">
+
+<div class="grid">
+
+<!-- LEFT PANEL -->
+
+<section class="panel">
+
+<h2>✨ Create Website</h2>
+
+<label> API Key</label>
+
+<div class="row">
+<input
+id="apiKey"
+type="password"
+placeholder="Paste Gemini API key">
+<button class="btn" id="save">Save</button>
+</div>
+
+<div id="apiStatus" class="small">
+No saved key.
+</div>
+
+<label>Describe your website</label>
+
+<textarea id="prompt" placeholder="Create a premium luxury kitchen remodeling website for a company in Dallas, Texas.
+
+Use black, ivory and gold.
+
+Include:
+Hero
+Services
+About
+Projects
+Testimonials
+Process
+FAQ
+Quote CTA
+Contact
+Footer
+
+Make it look like a $5,000+ professional agency website.
+
+Make every button and interaction functional."></textarea>
+
+<button class="primary" id="generate">
+✨ Generate Website
+</button>
+
+<div id="status" class="status"></div>
+
+<div class="actions">
+
+<button class="btn" id="copy">
+📋 Copy
+</button>
+
+<button class="btn" id="download">
+💾 Download
+</button>
+
+<button class="btn" id="regenerate">
+🔄 Regenerate
+</button>
+
+</div>
+
+<button
+class="btn"
+id="clear"
+style="width:100%;margin-top:8px">
+Remove API Key
+</button>
+
+<div class="small">
+Your API key is stored only in this browser.<br><br>
+For a production SaaS, use a secure backend.
+</div>
+
+</section>
+
+
+<!-- RIGHT PANEL -->
+
+<section class="panel">
+
+<div class="previewHead">
+
+<h2>Live Preview</h2>
+
+<div class="previewActions">
+
+<button class="btn" id="fullscreen">
+↗ Full Screen
+</button>
+
+<button class="btn" id="newtab">
+↗ New Tab
+</button>
+
+</div>
+
+</div>
+
+
+<!-- DEVICE SWITCHER -->
+
+<div class="deviceTabs">
+
+<button
+class="device active"
+data-width="100%">
+🖥 Desktop
+</button>
+
+<button
+class="device"
+data-width="768px">
+▣ Tablet
+</button>
+
+<button
+class="device"
+data-width="390px">
+📱 Mobile
+</button>
+
+</div>
+
+
+<!-- PREVIEW -->
+
+<div class="previewArea">
+
+<div
+class="previewDevice"
+id="previewDevice">
+
+<div
+class="empty"
+id="empty">
+
+<div class="emptyIcon">
+⚡
+</div>
+
+<b>
+Your AI website will appear here
+</b>
+
+<p>
+Describe your website and click
+<strong>Generate Website</strong>.
+</p>
+
+</div>
+
+<iframe
+id="preview"
+sandbox="allow-scripts allow-forms allow-modals allow-popups">
+</iframe>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+
+<!-- GENERATED CODE -->
+
+<section class="panel code">
+
+<div class="codeHead">
+
+<h2>
+Generated HTML
+</h2>
+
+<span
+id="count"
+class="small">
+0 characters
+</span>
+
+</div>
+
+<pre id="output">
+Your complete HTML will appear here...
+</pre>
+
+</section>
+
+</main>
+
+
+<!-- FULLSCREEN MODAL -->
+
+<div
+class="modal"
+id="modal">
+
+<div class="modalBar">
+
+<b>
+⚡ ForgeAI — Full Preview
+</b>
+
+<div class="modalBarActions">
+
+<button
+class="btn"
+id="modalTab">
+New Tab
+</button>
+
+<button
+class="btn"
+id="close">
+✕ Close
+</button>
+
+</div>
+
+</div>
+
+<iframe
+id="modalFrame"
+sandbox="allow-scripts allow-forms allow-modals allow-popups">
+</iframe>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div
+class="toast"
+id="toast">
+</div>
+
+
+<script>
+
+"use strict";
+
+
+/* =========================
+   CONFIG
+========================= */
+
+const KEY="forgeai_api_key";
+
+/*
+Change this model if your Gemini
+account/API does not support it.
+*/
+const MODEL="gemini-3-flash-preview";
+
+
+let generatedHTML="";
+let lastPrompt="";
+
+
+/* =========================
+   HELPERS
+========================= */
+
+const $=id=>document.getElementById(id);
+
+
+function toast(message){
+
+const t=$("toast");
+
+t.textContent=message;
+
+t.classList.add("show");
+
+clearTimeout(window.toastTimer);
+
+window.toastTimer=setTimeout(()=>{
+
+t.classList.remove("show");
+
+},2200);
+
+}
+
+
+function setStatus(message,type=""){
+
+const s=$("status");
+
+s.textContent=message;
+
+s.className="status "+type;
+
+}
+
+
+/* =========================
+   API KEY
+========================= */
+
+function saveKey(){
+
+const key=$("apiKey").value.trim();
+
+if(!key){
+
+toast("Enter your Gemini API key.");
+
+return;
+}
+
+localStorage.setItem(KEY,key);
+
+$("apiStatus").textContent="✅ API key saved.";
+
+toast("API key saved.");
+
+}
+
+
+function clearKey(){
+
+localStorage.removeItem(KEY);
+
+$("apiKey").value="";
+
+$("apiStatus").textContent="API key removed.";
+
+toast("API key removed.");
+
+}
+
+
+function getKey(){
+
+return $("apiKey").value.trim()
+||localStorage.getItem(KEY)
+||"";
+}
+
+
+function loadKey(){
+
+const key=localStorage.getItem(KEY);
+
+if(key){
+
+$("apiKey").value=key;
+
+$("apiStatus").textContent=
+"✅ Saved API key loaded.";
+
+}
+
+}
+
+
+/* =========================
+   CLEAN AI OUTPUT
+========================= */
+
+function cleanHTML(text){
+
+let html=String(text||"").trim();
+
+html=html.replace(
+/^```html\s*/i,
+""
+);
+
+html=html.replace(
+/^```\s*/i,
+""
+);
+
+html=html.replace(
+/\s*```$/i,
+""
+);
+
+const start=
+html.toLowerCase()
+.indexOf("<!doctype html>");
+
+if(start>0){
+
+html=html.slice(start);
+
+}
+
+const end=
+html.toLowerCase()
+.lastIndexOf("</html>");
+
+if(end!==-1){
+
+html=html.slice(0,end+7);
+
+}
+
+return html.trim();
+
+}
+
+
+function validHTML(html){
+
+return (
+
+/<!doctype\s+html/i.test(html)&&
+/<html/i.test(html)&&
+/<head/i.test(html)&&
+/<body/i.test(html)&&
+/<\/body>/i.test(html)&&
+/<\/html>/i.test(html)
+
+);
+
+}
+
+
+/* =========================
+   PREVIEW
+========================= */
+
+function showHTML(html){
+
+generatedHTML=html;
+
+$("output").textContent=html;
+
+$("count").textContent=
+html.length.toLocaleString()
++" characters";
+
+$("empty").style.display="none";
+
+$("preview").style.display="block";
+
+$("preview").srcdoc=html;
+
+}
+
+
+/* =========================
+   AI SYSTEM PROMPT
+========================= */
+
+function buildPrompt(user){
+
+return `You are ForgeAI, an elite AI website designer and senior frontend developer.
+
+Create a complete premium website based on this request:
+
+${user}
+
+IMPORTANT:
+
+RETURN ONLY ONE COMPLETE HTML DOCUMENT.
+
+The response MUST start with:
+
+<!DOCTYPE html>
+
+The response MUST end with:
+
+</html>
+
+Put ALL CSS inside <style>.
+
+Put ALL JavaScript inside <script>.
+
+Do not use Markdown.
+
+Do not use code fences.
+
+Do not explain anything outside the HTML.
+
+DESIGN QUALITY:
+
+Create a visually impressive, modern, premium website.
+
+Use professional typography.
+
+Use strong spacing and hierarchy.
+
+Use beautiful responsive layouts.
+
+Use subtle animations.
+
+Use hover effects.
+
+Use modern cards and sections.
+
+Use high-quality HTTPS images where appropriate.
+
+Make the website look like a professional $5,000+ agency-built website.
+
+RESPONSIVENESS:
+
+The website MUST work perfectly on:
+
+Desktop
+Tablet
+Mobile
+
+Prevent horizontal scrolling.
+
+Make navigation responsive.
+
+FUNCTIONALITY:
+
+Every button must work.
+
+Every navigation link must work.
+
+Mobile menu must open and close.
+
+FAQ must open and close.
+
+Forms must validate.
+
+Forms must show a success message without page reload.
+
+CTA buttons must work.
+
+Modals must open and close.
+
+Sliders must work if included.
+
+Tabs must work if included.
+
+Animations must work.
+
+All JavaScript functions must exist.
+
+All event listeners must point to real elements/functions.
+
+Never create decorative dead buttons.
+
+CONTENT:
+
+Include appropriate sections such as:
+
+Navigation
+Hero
+CTA
+Services
+About
+Stats
+Projects
+Gallery
+Process
+Testimonials
+FAQ
+Contact
+Footer
+
+Only include sections that make sense for the requested business.
+
+CODE QUALITY:
+
+Use semantic HTML.
+
+Use clean CSS.
+
+Use vanilla JavaScript.
+
+Do not depend on frameworks unless specifically requested.
+
+Do not leave unfinished sections.
+
+Do not use TODO.
+
+Do not use placeholder functions.
+
+Do not write "continue".
+
+Do not write "remaining code".
+
+Before returning the result, internally check:
+
+1. HTML structure
+2. CSS
+3. JavaScript
+4. Buttons
+5. Links
+6. Forms
+7. Mobile navigation
+8. FAQ
+9. Responsive layout
+10. Closing HTML tags
+
+RETURN ONLY THE COMPLETE HTML DOCUMENT.`;
+
+}
+
+
+/* =========================
+   GENERATE
+========================= */
+
+async function generate(){
+
+const key=getKey();
+
+const prompt=$("prompt")
+.value
+.trim();
+
+
+if(!key){
+
+toast(
+"Enter and save your Gemini API key."
+);
+
+return;
+
+}
+
+
+if(!prompt){
+
+toast(
+"Describe your website first."
+);
+
+return;
+
+}
+
+
+lastPrompt=prompt;
+
+
+const btn=$("generate");
+
+btn.disabled=true;
+
+btn.textContent="🤖 Designing...";
+
+setStatus(
+"AI is creating your website..."
+);
+
+
+try{
+
+const url=
+"https://generativelanguage.googleapis.com/v1beta/models/"
++MODEL+
+":generateContent?key="
++encodeURIComponent(key);
+
+
+const response=
+await fetch(url,{
+
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+body:JSON.stringify({
+
+contents:[
+
+{
+
+parts:[
+
+{
+
+text:
+buildPrompt(prompt)
+
+}
+
+]
+
+}
+
+],
+
+generationConfig:{
+
+temperature:.65
+
+}
+
+})
+
+});
+
+
+const data=
+await response.json();
+
+
+if(!response.ok){
+
+throw new Error(
+data?.error?.message
+||
+"Gemini API request failed."
+);
+
+}
+
+
+const text=
+data
+?.candidates?.[0]
+?.content?.parts?.[0]
+?.text;
+
+
+if(!text){
+
+throw new Error(
+"Gemini returned no website."
+);
+
+}
+
+
+const html=
+cleanHTML(text);
+
+
+if(!validHTML(html)){
+
+throw new Error(
+"Gemini returned incomplete HTML. Try Regenerate."
+);
+
+}
+
+
+showHTML(html);
+
+
+setStatus(
+"✅ Website generated successfully.",
+"ok"
+);
+
+
+toast(
+"Website ready!"
+);
+
+
+}catch(error){
+
+console.error(error);
+
+setStatus(
+"❌ "+error.message,
+"err"
+);
+
+toast(
+"Generation failed."
+);
+
+
+}finally{
+
+btn.disabled=false;
+
+btn.textContent=
+"✨ Generate Website";
+
+}
+
+}
+
+
+/* =========================
+   COPY
+========================= */
+
+async function copyHTML(){
+
+if(!generatedHTML){
+
+toast(
+"Generate a website first."
+);
+
+return;
+
+}
+
+
+try{
+
+await navigator
+.clipboard
+.writeText(generatedHTML);
+
+}catch(e){
+
+const box=
+document.createElement("textarea");
+
+box.value=generatedHTML;
+
+document.body.appendChild(box);
+
+box.select();
+
+document.execCommand("copy");
+
+box.remove();
+
+}
+
+
+toast(
+"✅ Complete HTML copied."
+);
+
+}
+
+
+/* =========================
+   DOWNLOAD
+========================= */
+
+function downloadHTML(){
+
+if(!generatedHTML){
+
+toast(
+"Generate a website first."
+);
+
+return;
+
+}
+
+
+const blob=
+new Blob(
+
+[generatedHTML],
+
+{
+type:"text/html"
+}
+
+);
+
+
+const url=
+URL.createObjectURL(blob);
+
+
+const a=
+document.createElement("a");
+
+a.href=url;
+
+a.download=
+"forgeai-website.html";
+
+document.body.appendChild(a);
+
+a.click();
+
+a.remove();
+
+
+setTimeout(()=>{
+
+URL.revokeObjectURL(url);
+
+},1000);
+
+
+toast(
+"✅ HTML downloaded."
+);
+
+}
+
+
+/* =========================
+   NEW TAB
+========================= */
+
+function openNewTab(){
+
+if(!generatedHTML){
+
+toast(
+"Generate a website first."
+);
+
+return;
+
+}
+
+
+const blob=
+new Blob(
+
+[generatedHTML],
+
+{
+type:"text/html"
+}
+
+);
+
+
+const url=
+URL.createObjectURL(blob);
+
+
+const win=
+window.open(
+url,
+"_blank"
+);
+
+
+if(!win){
+
+URL.revokeObjectURL(url);
+
+toast(
+"Allow popups and try again."
+);
+
+return;
+
+}
+
+
+setTimeout(()=>{
+
+URL.revokeObjectURL(url);
+
+},60000);
+
+}
+
+
+/* =========================
+   FULLSCREEN
+========================= */
+
+function openFullscreen(){
+
+if(!generatedHTML){
+
+toast(
+"Generate a website first."
+);
+
+return;
+
+}
+
+
+$("modalFrame")
+.srcdoc=
+generatedHTML;
+
+
+$("modal")
+.classList.add("open");
+
+document.body.style.overflow=
+"hidden";
+
+}
+
+
+function closeFullscreen(){
+
+$("modal")
+.classList.remove("open");
+
+$("modalFrame")
+.srcdoc="";
+
+document.body.style.overflow="";
+
+}
+
+
+/* =========================
+   DEVICE SWITCHER
+========================= */
+
+document
+.querySelectorAll(".device")
+.forEach(button=>{
+
+button.addEventListener(
+"click",
+()=>{
+
+document
+.querySelectorAll(".device")
+.forEach(btn=>{
+
+btn.classList.remove(
+"active"
+);
+
+});
+
+
+button.classList.add(
+"active"
+);
+
+
+const width=
+button.dataset.width;
+
+
+$("previewDevice")
+.style.width=
+width;
+
+
+if(width==="100%"){
+
+$("previewArea")
+.style.alignItems=
+"flex-start";
+
+}else{
+
+$("previewArea")
+.style.alignItems=
+"flex-start";
+
+}
+
+}
+
+);
+
+});
+
+
+/* =========================
+   EVENTS
+========================= */
+
+$("save")
+.addEventListener(
+"click",
+saveKey
+);
+
+
+$("clear")
+.addEventListener(
+"click",
+clearKey
+);
+
+
+$("generate")
+.addEventListener(
+"click",
+generate
+);
+
+
+$("copy")
+.addEventListener(
+"click",
+copyHTML
+);
+
+
+$("download")
+.addEventListener(
+"click",
+downloadHTML
+);
+
+
+$("regenerate")
+.addEventListener(
+"click",
+()=>{
+
+if(!lastPrompt){
+
+toast(
+"Generate a website first."
+);
+
+return;
+
+}
+
+generate();
+
+}
+);
+
+
+$("fullscreen")
+.addEventListener(
+"click",
+openFullscreen
+);
+
+
+$("newtab")
+.addEventListener(
+"click",
+openNewTab
+);
+
+
+$("modalTab")
+.addEventListener(
+"click",
+openNewTab
+);
+
+
+$("close")
+.addEventListener(
+"click",
+closeFullscreen
+);
+
+
+/* ESC CLOSE */
+
+document.addEventListener(
+"keydown",
+event=>{
+
+if(event.key==="Escape"){
+
+closeFullscreen();
+
+}
+
+});
+
+
+/* ENTER = GENERATE */
+
+$("prompt")
+.addEventListener(
+"keydown",
+event=>{
+
+if(
+(event.ctrlKey||
+event.metaKey)&&
+event.key==="Enter"
+){
+
+generate();
+
+}
+
+});
+
+
+/* =========================
+   START
+========================= */
+
+loadKey();
+
+console.log(
+"ForgeAI loaded successfully."
+);
+
+</script>
+
+</body>
+</html>
